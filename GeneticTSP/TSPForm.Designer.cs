@@ -35,9 +35,9 @@
             // 
             // m_DrawSurface
             // 
-            this.m_DrawSurface.Location = new System.Drawing.Point(66, 59);
+            this.m_DrawSurface.Location = new System.Drawing.Point(23, 50);
             this.m_DrawSurface.Name = "m_DrawSurface";
-            this.m_DrawSurface.Size = new System.Drawing.Size(704, 468);
+            this.m_DrawSurface.Size = new System.Drawing.Size(1849, 899);
             this.m_DrawSurface.TabIndex = 0;
             this.m_DrawSurface.TabStop = false;
             // 
@@ -54,7 +54,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(807, 556);
+            this.ClientSize = new System.Drawing.Size(1884, 961);
             this.Controls.Add(this.m_gen_box);
             this.Controls.Add(this.m_DrawSurface);
             this.Name = "TSPForm";

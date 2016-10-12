@@ -9,8 +9,8 @@ namespace GeneticTSP
 {
     public partial class TSPForm : Form
     {
-        public static int NUM_CITIES = 20;
-        public static int POP_SIZE = 40;
+        public static int NUM_CITIES = 100;
+        public static int POP_SIZE = 200;
 
         private TSPDrawer m_drawer;
         private TSPMap m_map;
@@ -36,7 +36,7 @@ namespace GeneticTSP
             Bitmap flag = new Bitmap(draw_surface_size.Width, draw_surface_size.Height);
             Graphics flag_graphics = Graphics.FromImage(flag);
             flag_graphics.Clear(Color.White);
-            m_drawer = new TSPDrawer(flag_graphics, draw_surface_size, 30);
+            m_drawer = new TSPDrawer(flag_graphics, draw_surface_size, 10);
             m_drawer.DrawCities(m_map.Cities.Values.ToList(), m_gen_alg.FittestGenome.Data);
             m_DrawSurface.Image = flag;
         }
@@ -116,11 +116,13 @@ namespace GeneticTSP
         {
             m_graphics.DrawEllipse(Pens.Black, city.X, city.Y, m_city_radius * 2, m_city_radius * 2);
 
-            using (Font draw_font = new Font("Arial", 14))
+            /*
+            using (Font draw_font = new Font("Arial", 8))
             using (SolidBrush draw_brush = new SolidBrush(Color.Blue))
             {
                 m_graphics.DrawString(city.ID.ToString(), draw_font, draw_brush, city.X, city.Y);
             }
+            */
         }
 
         public void DrawCities(IList<City> cities, IList<int> indices)

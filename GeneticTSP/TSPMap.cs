@@ -114,7 +114,7 @@ namespace GeneticTSP
             }
         }
 
-        public double CalculateTourLength(IGenome<int> genome)
+        public double CalculateTourLength(PathGenome genome)
         {
             double tour_length = 0;
             City start = m_cities[genome.Data[0]];
