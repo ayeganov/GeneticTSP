@@ -41,7 +41,7 @@ namespace TSPGenTest
         }
 
         [TestMethod]
-        public void TestPBCrossOver()
+        public void TestPositionBasedCrossover()
         {
             PathGenome dad = new PathGenome(new List<int> { 2, 5, 0, 3, 6, 1, 4, 7 });
             PathGenome mom = new PathGenome(new List<int> { 3, 4, 0, 7, 2, 5, 1, 6 });
@@ -92,7 +92,7 @@ namespace TSPGenTest
             PathGenome genome = new PathGenome(cities.ToList());
             IMutator<PathGenome> disp_mut = new DisplacementMutator();
             var expected_sequnce = new List<int> { 4, 5, 6, 7, 8, 0, 1, 2, 3, 9 };
-            disp_mut.mutate(genome);
+            disp_mut.Mutate(genome);
 
             Assert.IsTrue(AreListsEqual(expected_sequnce, genome.Data));
         }
@@ -113,7 +113,7 @@ namespace TSPGenTest
             PathGenome genome = new PathGenome(cities.ToList());
             IMutator<PathGenome> disp_mut = new DisplacementMutator();
             var expected_sequnce = new List<int> { 4, 5, 6, 7, 0, 1, 2, 3, 8, 9 };
-            disp_mut.mutate(genome);
+            disp_mut.Mutate(genome);
 
             Assert.IsTrue(AreListsEqual(expected_sequnce, genome.Data));
         }
@@ -134,7 +134,7 @@ namespace TSPGenTest
             PathGenome genome = new PathGenome(cities.ToList());
             IMutator<PathGenome> disp_mut = new DisplacementMutator();
             var expected_sequnce = new List<int> { 0, 1, 2, 8, 9, 3, 4, 5, 6, 7 };
-            disp_mut.mutate(genome);
+            disp_mut.Mutate(genome);
 
             Assert.IsTrue(AreListsEqual(expected_sequnce, genome.Data));
         }
@@ -153,7 +153,7 @@ namespace TSPGenTest
             PathGenome genome = new PathGenome(cities.ToList());
             IMutator<PathGenome> disp_mut = new DisplacementMutator();
             var expected_sequnce = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            disp_mut.mutate(genome);
+            disp_mut.Mutate(genome);
 
             Assert.IsTrue(AreListsEqual(expected_sequnce, genome.Data));
         }
@@ -166,12 +166,12 @@ namespace TSPGenTest
             PathGenome genome = new PathGenome(cities.ToList());
 
             IMutator<PathGenome> scramble_mut = new ScrambleMutator();
-            scramble_mut.mutate(genome);
+            scramble_mut.Mutate(genome);
 
             var equal = true;
             while(equal)
             {
-                scramble_mut.mutate(genome);
+                scramble_mut.Mutate(genome);
                 equal = AreListsEqual(cities.ToList(), genome.Data);
             }
             Assert.IsFalse(equal);
@@ -190,7 +190,7 @@ namespace TSPGenTest
             GRNG.RNG = mock.Object;
 
             IMutator<PathGenome> insertion_mut = new InsertionMutator();
-            insertion_mut.mutate(genome);
+            insertion_mut.Mutate(genome);
             var equal = AreListsEqual(cities.ToList(), genome.Data);
             Assert.IsFalse(equal);
         }
@@ -207,7 +207,7 @@ namespace TSPGenTest
             GRNG.RNG = mock.Object;
 
             IMutator<PathGenome> inversion_mut = new InversionMutator();
-            inversion_mut.mutate(genome);
+            inversion_mut.Mutate(genome);
 
             var expected_sequnce = new List<int> { 0, 1, 2, 8, 7, 6, 5, 4, 3, 9 };
             var equal = AreListsEqual(expected_sequnce, genome.Data);
@@ -230,7 +230,7 @@ namespace TSPGenTest
             PathGenome genome = new PathGenome(cities.ToList());
             IMutator<PathGenome> disp_mut = new DisplacedInversionMutator();
             var expected_sequnce = new List<int> { 7, 6, 5, 4, 0, 1, 2, 3, 8, 9 };
-            disp_mut.mutate(genome);
+            disp_mut.Mutate(genome);
 
             Assert.IsTrue(AreListsEqual(expected_sequnce, genome.Data));
         }

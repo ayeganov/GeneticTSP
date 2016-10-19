@@ -26,7 +26,7 @@ namespace GeneticTSP
             KeyDown += KeyPressed;
             m_gen_box.KeyDown += KeyPressed;
             m_map = new TSPMap(m_DrawSurface.Size.Height, m_DrawSurface.Size.Width, NUM_CITIES);
-            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map);
+            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, new BoltzmannFitnessScaler(300));
             m_DrawSurface.Focus();
         }
 

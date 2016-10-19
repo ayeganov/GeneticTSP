@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace GeneticTSP
@@ -80,12 +81,15 @@ namespace GeneticTSP
     {
         void Epoch();
         void CalculateFitness();
-        IList<TGenomeType> CreatePopulation(IList<TGenomeType> generation, ISelectionStrategy<TGenomeType> strategy);
+        IGeneration<TGenomeType> CreateGeneration(IGeneration<TGenomeType> generation, ISelectionStrategy<TGenomeType> strategy);
     }
 
     public interface IGenome<TData, TSubtype> where TSubtype : IGenome<TData, TSubtype>
     {
         IList<TData> Data { get; }
+        /**
+         * <summary> Fitness of this genome </summary>
+         */
         double Fitness { get; set; }
 
         Tuple<TSubtype, TSubtype> CrossOver(TSubtype other, double crossOverRate);
@@ -94,7 +98,8 @@ namespace GeneticTSP
 
     interface ISelectionStrategy<TGenomeType>
     {
-        TGenomeType Select(IList<TGenomeType> population);
+        TGenomeType Select(IGeneration<TGenomeType> generation);
+        IEnumerable<TGenomeType> SelectN(IGeneration<TGenomeType> generation, int n);
     }
 
     struct FitnessStat
@@ -103,12 +108,66 @@ namespace GeneticTSP
         double FitnessStdDev { get; set; }
     }
 
-    interface IPopulation<TIndivid>
+    public interface IGeneration<TGenomeType> : IEnumerable<TGenomeType>
     {
-        int Generation { get; set; }
-        IEnumerable<TIndivid> getGeneration(int generation);
-        double getGenerationAverage(int genIdx);
-        IEnumerable<double> getGenerationsAverages();
+        double AverageFitness
+        {
+            get;
+        }
+
+        double StandardDeviation
+        {
+            get;
+        }
+
+        TGenomeType BestGenome
+        {
+            get;
+        }
+
+        TGenomeType WorstGenome
+        {
+            get;
+        }
+
+        double TotalFitness
+        {
+            get;
+        }
+
+        double BestFitness
+        {
+            get;
+        }
+
+        double WorstFitness
+        {
+            get;
+        }
+
+        TGenomeType this[int index]
+        {
+            get;
+        }
+
+        int Size
+        {
+            get;
+        }
+
+        void CalculateStats();
+
+        void AddGenome(TGenomeType genome);
+    }
+
+    interface IPopulation<TGenomeType>
+    {
+        int Generation { get; }
+        IGeneration<TGenomeType> GetGeneration(int generation);
+        double GetGenerationAverage(int genIdx);
+        IEnumerable<double> GetGenerationsAverages();
+        void AddGeneration(IGeneration<TGenomeType> g);
+        IGeneration<TGenomeType> LastGeneration { get; }
     }
 
     public enum MutationType
@@ -130,7 +189,7 @@ namespace GeneticTSP
 
     public interface IMutator<TGenomeType>
     {
-        void mutate(TGenomeType genome);
+        void Mutate(TGenomeType genome);
     }
 
     public interface ICrossOver<TGenomeType>
@@ -140,11 +199,16 @@ namespace GeneticTSP
 
     public interface IMutatorFactory<TMutator>
     {
-        TMutator createMutator(MutationType mut_type);
+        TMutator CreateMutator(MutationType mut_type);
     }
 
     public interface ICrossoverFactory<TCrossover>
     {
-        TCrossover createCrossover(CrossoverType co_type);
+        TCrossover CreateCrossover(CrossoverType co_type);
+    }
+
+    internal interface IFitnessScaler<TGenomeType>
+    {
+        void ScalePopulationFitness(IGeneration<TGenomeType> generation);
     }
 }

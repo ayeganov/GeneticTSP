@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IGenAlg.cs" />
+    <Compile Include="RunningStat.cs" />
     <Compile Include="TSPForm.cs">
       <SubType>Form</SubType>
     </Compile>
