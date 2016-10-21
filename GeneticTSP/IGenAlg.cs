@@ -82,6 +82,11 @@ namespace GeneticTSP
         void Epoch();
         void CalculateFitness();
         IGeneration<TGenomeType> CreateGeneration(IGeneration<TGenomeType> generation, ISelectionStrategy<TGenomeType> strategy);
+        void SetSelectionStrategy(ISelectionStrategy<TGenomeType> strategy);
+        void SetMutationType(MutationType type);
+        void SetCrossoverType(CrossoverType type);
+        void SetScalingType(IFitnessScaler<TGenomeType> scaler);
+        bool Elitism { get; }
     }
 
     public interface IGenome<TData, TSubtype> where TSubtype : IGenome<TData, TSubtype>

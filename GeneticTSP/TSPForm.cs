@@ -9,12 +9,13 @@ namespace GeneticTSP
 {
     public partial class TSPForm : Form
     {
-        public static int NUM_CITIES = 100;
+        public static int NUM_CITIES = 15;
         public static int POP_SIZE = 200;
 
         private TSPDrawer m_drawer;
         private TSPMap m_map;
         private TSPGenAlg m_gen_alg;
+        private bool m_running;
 
         delegate void SetTextCallback(string text);
 
@@ -24,10 +25,17 @@ namespace GeneticTSP
             Controls.Add(m_DrawSurface);
             Enter += SolveTSP;
             KeyDown += KeyPressed;
+            FormClosing += OnFormClosing;
             m_gen_box.KeyDown += KeyPressed;
             m_map = new TSPMap(m_DrawSurface.Size.Height, m_DrawSurface.Size.Width, NUM_CITIES);
-            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, new BoltzmannFitnessScaler(300));
+            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, new SigmaFitnessScaler());
+            m_running = true;
             m_DrawSurface.Focus();
+        }
+ 
+        private void OnFormClosing(object sender, FormClosingEventArgs e)
+        {
+            m_running = false;
         }
 
         private void DrawPath()
@@ -49,7 +57,7 @@ namespace GeneticTSP
                 if (Disposing || IsDisposed) return;
                 try
                 {
-                    Invoke(cb, new object[] { text });
+                    BeginInvoke(cb, new object[] { text });
                 }
                 catch
                 {
@@ -65,9 +73,12 @@ namespace GeneticTSP
         private async void SolveTSP(object sender, EventArgs e)
         {
             Console.WriteLine("Trying to solve again.");
+            m_gen_alg.Done = true;
+            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, null);
             await Task.Run(() =>
             {
-                while (!m_gen_alg.Done)
+                Console.WriteLine($"GenAlg done {m_gen_alg.Done}");
+                while (!m_gen_alg.Done && m_running)
                 {
                     //                    Console.WriteLine($"Generation {m_gen_alg.GenerationNumber}");
                     setGenerationText(m_gen_alg.GenerationNumber.ToString());
@@ -93,6 +104,123 @@ namespace GeneticTSP
                     break;
             }
         }
+
+        private void CheckSelectedItem(ToolStripMenuItem selected_item)
+        {
+            foreach(ToolStripMenuItem item in selected_item.GetCurrentParent().Items)
+            {
+                item.Checked = false;
+            }
+            selected_item.Checked = true;
+        }
+
+        private void permutationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetCrossoverType(CrossoverType.PartiallyMatched);
+        }
+
+        private void orderBasedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetCrossoverType(CrossoverType.OrderBased);
+        }
+
+        private void positionBasedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetCrossoverType(CrossoverType.PositionBased);
+        }
+
+        private void exchangeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetMutationType(MutationType.Exchange);
+        }
+
+        private void scrambleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetMutationType(MutationType.Scramble);
+        }
+
+        private void insertionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetMutationType(MutationType.Insertion);
+        }
+
+        private void displacementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetMutationType(MutationType.Displacement);
+        }
+
+        private void inversionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetMutationType(MutationType.Inversion);
+        }
+
+        private void displacedInversionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetMutationType(MutationType.DisplacedInversion);
+        }
+
+        private void noneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetScalingType(null);
+        }
+
+        private void rankToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetScalingType(new RankFitnessScaler());
+        }
+
+        private void sigmaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetScalingType(new SigmaFitnessScaler());
+        }
+
+        private void boltzmannToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetScalingType(new BoltzmannFitnessScaler(300));
+        }
+
+        private void roulletteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetSelectionStrategy(new RouletteWheelSelection());
+        }
+
+        private void tournamentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetSelectionStrategy(new TournamentSelection());
+        }
+
+        private void SUSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.SetSelectionStrategy(new SUSSelection());
+        }
+
+        private void elitismOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.Elitism = true;
+        }
+
+        private void elitismOffToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSelectedItem(sender as ToolStripMenuItem);
+            m_gen_alg.Elitism = false;
+        }
     }
 
     public class TSPDrawer
@@ -114,7 +242,7 @@ namespace GeneticTSP
 
         private void DrawCity(City city)
         {
-            m_graphics.DrawEllipse(Pens.Black, city.X, city.Y, m_city_radius * 2, m_city_radius * 2);
+            m_graphics.DrawEllipse(Pens.Black, city.X - m_city_radius, city.Y - m_city_radius, m_city_radius * 2, m_city_radius * 2);
 
             /*
             using (Font draw_font = new Font("Arial", 8))
