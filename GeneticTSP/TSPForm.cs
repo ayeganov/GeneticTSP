@@ -9,8 +9,8 @@ namespace GeneticTSP
 {
     public partial class TSPForm : Form
     {
-        public static int NUM_CITIES = 15;
-        public static int POP_SIZE = 200;
+        public static int NUM_CITIES = 100;
+        public static int POP_SIZE = 150;
 
         private TSPDrawer m_drawer;
         private TSPMap m_map;
@@ -28,7 +28,7 @@ namespace GeneticTSP
             FormClosing += OnFormClosing;
             m_gen_box.KeyDown += KeyPressed;
             m_map = new TSPMap(m_DrawSurface.Size.Height, m_DrawSurface.Size.Width, NUM_CITIES);
-            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, new SigmaFitnessScaler());
+            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, new BoltzmannFitnessScaler(300));
             m_running = true;
             m_DrawSurface.Focus();
         }

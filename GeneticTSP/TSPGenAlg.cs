@@ -903,7 +903,11 @@ namespace GeneticTSP
                 while(new_generation.Count < generation.Size - elites)
                 {
                     var dad = strategy.Select(generation);
+                    dad.MutationType = m_mutation_type;
+                    dad.CrossoverType = m_crossover_type;
                     var mom = strategy.Select(generation);
+                    mom.MutationType = m_mutation_type;
+                    mom.CrossoverType = m_crossover_type;
                     var kids = dad.CrossOver(mom, CROSSOVER_RATE);
                     if (kids == null) continue;
 

@@ -102,7 +102,7 @@
             // permutationToolStripMenuItem
             // 
             this.permutationToolStripMenuItem.Name = "permutationToolStripMenuItem";
-            this.permutationToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+            this.permutationToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.permutationToolStripMenuItem.Text = "Permutation";
             this.permutationToolStripMenuItem.Click += new System.EventHandler(this.permutationToolStripMenuItem_Click);
             // 
@@ -111,14 +111,14 @@
             this.orderBasedToolStripMenuItem.Checked = true;
             this.orderBasedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.orderBasedToolStripMenuItem.Name = "orderBasedToolStripMenuItem";
-            this.orderBasedToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+            this.orderBasedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.orderBasedToolStripMenuItem.Text = "Order Based";
             this.orderBasedToolStripMenuItem.Click += new System.EventHandler(this.orderBasedToolStripMenuItem_Click);
             // 
             // positionBasedToolStripMenuItem
             // 
             this.positionBasedToolStripMenuItem.Name = "positionBasedToolStripMenuItem";
-            this.positionBasedToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+            this.positionBasedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.positionBasedToolStripMenuItem.Text = "Position Based";
             this.positionBasedToolStripMenuItem.Click += new System.EventHandler(this.positionBasedToolStripMenuItem_Click);
             // 
@@ -193,30 +193,30 @@
             // noneToolStripMenuItem
             // 
             this.noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            this.noneToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.noneToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.noneToolStripMenuItem.Text = "None";
             this.noneToolStripMenuItem.Click += new System.EventHandler(this.noneToolStripMenuItem_Click);
             // 
             // rankToolStripMenuItem
             // 
             this.rankToolStripMenuItem.Name = "rankToolStripMenuItem";
-            this.rankToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.rankToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.rankToolStripMenuItem.Text = "Rank";
             this.rankToolStripMenuItem.Click += new System.EventHandler(this.rankToolStripMenuItem_Click);
             // 
             // sigmaToolStripMenuItem
             // 
-            this.sigmaToolStripMenuItem.Checked = true;
-            this.sigmaToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.sigmaToolStripMenuItem.Name = "sigmaToolStripMenuItem";
-            this.sigmaToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.sigmaToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.sigmaToolStripMenuItem.Text = "Sigma";
             this.sigmaToolStripMenuItem.Click += new System.EventHandler(this.sigmaToolStripMenuItem_Click);
             // 
             // boltzmannToolStripMenuItem
             // 
+            this.boltzmannToolStripMenuItem.Checked = true;
+            this.boltzmannToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.boltzmannToolStripMenuItem.Name = "boltzmannToolStripMenuItem";
-            this.boltzmannToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.boltzmannToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.boltzmannToolStripMenuItem.Text = "Boltzmann";
             this.boltzmannToolStripMenuItem.Click += new System.EventHandler(this.boltzmannToolStripMenuItem_Click);
             // 
@@ -233,7 +233,7 @@
             // roulletteToolStripMenuItem
             // 
             this.roulletteToolStripMenuItem.Name = "roulletteToolStripMenuItem";
-            this.roulletteToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.roulletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.roulletteToolStripMenuItem.Text = "Roullette";
             this.roulletteToolStripMenuItem.Click += new System.EventHandler(this.roulletteToolStripMenuItem_Click);
             // 
@@ -242,14 +242,14 @@
             this.tournamentToolStripMenuItem.Checked = true;
             this.tournamentToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tournamentToolStripMenuItem.Name = "tournamentToolStripMenuItem";
-            this.tournamentToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.tournamentToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.tournamentToolStripMenuItem.Text = "Tournament";
             this.tournamentToolStripMenuItem.Click += new System.EventHandler(this.tournamentToolStripMenuItem_Click);
             // 
             // sUSToolStripMenuItem
             // 
             this.sUSToolStripMenuItem.Name = "sUSToolStripMenuItem";
-            this.sUSToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.sUSToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.sUSToolStripMenuItem.Text = "SUS";
             this.sUSToolStripMenuItem.Click += new System.EventHandler(this.SUSToolStripMenuItem_Click);
             // 
@@ -267,14 +267,14 @@
             this.onToolStripMenuItem.Checked = true;
             this.onToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.onToolStripMenuItem.Name = "onToolStripMenuItem";
-            this.onToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.onToolStripMenuItem.Size = new System.Drawing.Size(91, 22);
             this.onToolStripMenuItem.Text = "On";
             this.onToolStripMenuItem.Click += new System.EventHandler(this.elitismOnToolStripMenuItem_Click);
             // 
             // offToolStripMenuItem
             // 
             this.offToolStripMenuItem.Name = "offToolStripMenuItem";
-            this.offToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.offToolStripMenuItem.Size = new System.Drawing.Size(91, 22);
             this.offToolStripMenuItem.Text = "Off";
             this.offToolStripMenuItem.Click += new System.EventHandler(this.elitismOffToolStripMenuItem_Click);
             // 
