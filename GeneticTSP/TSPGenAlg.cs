@@ -207,57 +207,6 @@ namespace GeneticTSP
         }
     }
 
-    public class Population : IPopulation<PathGenome>
-    {
-        private IList<IGeneration<PathGenome>> m_generations;
-
-        public Population()
-        {
-            m_generations = new List<IGeneration<PathGenome>>();
-        }
-
-        public IGeneration<PathGenome> LastGeneration
-        {
-            get
-            {
-                return m_generations[Generation - 1];
-            }
-        }
-
-        public int Generation
-        {
-            get
-            {
-                return m_generations.Count;
-            }
-        }
-
-        public IGeneration<PathGenome> GetGeneration(int generation)
-        {
-            if (generation < 0) throw new ArgumentOutOfRangeException("Can't get negative generation.");
-            return m_generations[generation];
-        }
-
-        public double GetGenerationAverage(int genIdx)
-        {
-            if (genIdx < 0) throw new ArgumentOutOfRangeException("Can't get negative generations average fitness.");
-            return m_generations[genIdx].AverageFitness;
-        }
-
-        public IEnumerable<double> GetGenerationsAverages()
-        {
-            foreach(var g in m_generations)
-            {
-                yield return g.AverageFitness;
-            }
-        }
-
-        public void AddGeneration(IGeneration<PathGenome> g)
-        {
-            m_generations.Add(g);
-        }
-    }
-
     public class MutatorFactory : IMutatorFactory<IMutator<PathGenome>>
     {
         public IMutator<PathGenome> CreateMutator(MutationType mut_type)
@@ -566,6 +515,7 @@ namespace GeneticTSP
 
     internal class SigmaFitnessScaler : IFitnessScaler<PathGenome>
     {
+        public event Action<double> OnScale;
         public void ScalePopulationFitness(IGeneration<PathGenome> generation)
         {
             if(generation.AverageFitness > 0.0)
@@ -583,6 +533,7 @@ namespace GeneticTSP
 
     internal class RankFitnessScaler : IFitnessScaler<PathGenome>
     {
+        public event Action<double> OnScale;
         public void ScalePopulationFitness(IGeneration<PathGenome> generation)
         {
             int rank = 0;
@@ -601,10 +552,16 @@ namespace GeneticTSP
         private static double BOLTZMAN_MIN = 1.0;
 
         private double m_boltzmann_temp;
+        public event Action<double> OnScale;
 
         public BoltzmannFitnessScaler(double temperature)
         {
             m_boltzmann_temp = temperature;
+        }
+
+        public BoltzmannFitnessScaler(double temperature, Action<double> on_scale) : this(temperature)
+        {
+            OnScale += on_scale;
         }
 
         public void ScalePopulationFitness(IGeneration<PathGenome> generation)
@@ -620,6 +577,28 @@ namespace GeneticTSP
                 genome.Fitness = (old_fitness / m_boltzmann_temp) / divider;
             }
             generation.CalculateStats();
+            if(OnScale != null)
+            {
+                OnScale.Invoke(m_boltzmann_temp);
+            }
+        }
+    }
+
+    public class FitnessScalerFactory : IFitnessScalerFactory<PathGenome>
+    {
+        public IFitnessScaler<PathGenome> CreateFitnessScaler(ScalerType scale_type)
+        {
+            switch(scale_type)
+            {
+                case ScalerType.Boltzmann:
+                    return new BoltzmannFitnessScaler(300);
+                case ScalerType.Rank:
+                    return new RankFitnessScaler();
+                case ScalerType.Sigma:
+                    return new SigmaFitnessScaler();
+                default:
+                    throw new ArgumentException($"Unknown scaler type {scale_type}");
+            }
         }
     }
 
@@ -819,9 +798,10 @@ namespace GeneticTSP
 
     class TSPGenAlg : IGenAlg<PathGenome>
     {
-        public static double CROSSOVER_RATE = 0.75;
-        public static double MUTATION_RATE = 0.25;
+        public static double CROSSOVER_RATE = 0.7;
+        public static double MUTATION_RATE = 0.2;
         public static int NUM_BEST_TO_ADD = 2;
+        public static FitnessScalerFactory ScalerFactory = new FitnessScalerFactory();
 
         private double m_shortest_route;
         private double m_longest_route;
@@ -832,6 +812,7 @@ namespace GeneticTSP
         private IGeneration<PathGenome> m_generation;
         private CrossoverType m_crossover_type;
         private MutationType m_mutation_type;
+        private ScalerType m_scaler_type;
 
         public bool Done { get; set; }
         public int GenerationNumber
@@ -846,16 +827,32 @@ namespace GeneticTSP
             get; set;
         }
 
-        public TSPGenAlg(int num_cities, int population_size, TSPMap map, IFitnessScaler<PathGenome> scaler)
+        public IFitnessScaler<PathGenome> FitnessScaler
         {
+            get
+            {
+                return m_fitness_scaler;
+            }
+        }
 
+        public TSPGenAlg(TSPGenAlg other) : this(other.m_generation[0].Data.Count, other.m_generation.Count(), other.m_map, other.m_scaler_type)
+        {
+            m_crossover_type = other.m_crossover_type;
+            m_mutation_type = other.m_mutation_type;
+            Elitism = other.Elitism;
+            m_selection_strategy = other.m_selection_strategy;
+        }
+
+        public TSPGenAlg(int num_cities, int population_size, TSPMap map, ScalerType scale_type)
+        {
             m_shortest_route = double.MaxValue;
             m_longest_route = double.MinValue;
             m_map = map;
             m_selection_strategy = new TournamentSelection();
-            m_fitness_scaler = scaler;
+            m_fitness_scaler = ScalerFactory.CreateFitnessScaler(scale_type);
             m_crossover_type = CrossoverType.OrderBased;
             m_mutation_type = MutationType.Insertion;
+            m_scaler_type = scale_type;
             Done = false;
             Elitism = true;
 
@@ -887,7 +884,6 @@ namespace GeneticTSP
                     var kids = mom.CrossOver(dad, CROSSOVER_RATE);
                     if (kids == null)
                     {
-                        Console.WriteLine("Incest!");
                         kids = Tuple.Create(mom, dad);
                     }
 
@@ -932,7 +928,7 @@ namespace GeneticTSP
             m_longest_route = double.MinValue;
         }
 
-        public void Epoch()
+        public string Epoch()
         {
             try
             {
@@ -942,7 +938,7 @@ namespace GeneticTSP
                 if(m_shortest_route <= m_map.BestPossibleRoute)
                 {
                     Done = true;
-                    return;
+                    return "Done";
                 }
 
                 if(m_fitness_scaler != null)
@@ -952,19 +948,19 @@ namespace GeneticTSP
 
                 if(m_generation.StandardDeviation == 0)
                 {
-                    Console.WriteLine("No diversity baby, staaahhp.");
                     Done = true;
-                    return;
+                    return "No diversity, stopping the run";
                 }
 
                 m_generation = CreateGeneration(m_generation, m_selection_strategy);
                 GenerationNumber++;
-//                Console.WriteLine($"New generation {m_population.LastGeneration}");
             }
             catch(Exception e)
             {
                 Console.WriteLine($"WTF: {e.Message}");
+                return e.Message;
             }
+            return null;
         }
 
         public void CalculateFitness()

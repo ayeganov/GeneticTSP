@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -10,14 +11,16 @@ namespace GeneticTSP
     public partial class TSPForm : Form
     {
         public static int NUM_CITIES = 100;
-        public static int POP_SIZE = 150;
+        public static int POP_SIZE = 200;
 
         private TSPDrawer m_drawer;
         private TSPMap m_map;
         private TSPGenAlg m_gen_alg;
         private bool m_running;
 
-        delegate void SetTextCallback(string text);
+        private AutoResetEvent m_stopped_event;
+
+        delegate void SetTextCallback(TextBox text_box, string text);
 
         public TSPForm()
         {
@@ -28,11 +31,18 @@ namespace GeneticTSP
             FormClosing += OnFormClosing;
             m_gen_box.KeyDown += KeyPressed;
             m_map = new TSPMap(m_DrawSurface.Size.Height, m_DrawSurface.Size.Width, NUM_CITIES);
-            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, new BoltzmannFitnessScaler(300));
+            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, ScalerType.Boltzmann);
+            m_gen_alg.FitnessScaler.OnScale += DisplayBoltzmannTemperature;
             m_running = true;
             m_DrawSurface.Focus();
+            m_stopped_event = new AutoResetEvent(true);
         }
  
+        private void DisplayBoltzmannTemperature(double temperature)
+        {
+            setTexboxText(m_boltz_text, Math.Floor(temperature).ToString());
+        }
+
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             m_running = false;
@@ -49,15 +59,15 @@ namespace GeneticTSP
             m_DrawSurface.Image = flag;
         }
 
-        private void setGenerationText(string text)
+        private void setTexboxText(TextBox text_box, string text)
         {
-            if(m_gen_box.InvokeRequired)
+            if(text_box.InvokeRequired)
             {
-                SetTextCallback cb = new SetTextCallback(setGenerationText);
+                SetTextCallback cb = new SetTextCallback(setTexboxText);
                 if (Disposing || IsDisposed) return;
                 try
                 {
-                    BeginInvoke(cb, new object[] { text });
+                    BeginInvoke(cb, new object[] { text_box, text });
                 }
                 catch
                 {
@@ -66,29 +76,38 @@ namespace GeneticTSP
             }
             else
             {
-                m_gen_box.Text = text;
+                text_box.Text = text;
             }
         }
 
         private async void SolveTSP(object sender, EventArgs e)
         {
             Console.WriteLine("Trying to solve again.");
-            m_gen_alg.Done = true;
-            m_gen_alg = new TSPGenAlg(NUM_CITIES, POP_SIZE, m_map, null);
+            m_gen_alg.Done = m_gen_alg.GenerationNumber > 0;
+            m_stopped_event.WaitOne();
+
+            if (m_gen_alg.GenerationNumber > 0)
+            {
+                m_gen_alg = new TSPGenAlg(m_gen_alg);
+                m_gen_alg.FitnessScaler.OnScale += DisplayBoltzmannTemperature;
+            }
+
+            m_stopped_event.Reset();
             await Task.Run(() =>
             {
-                Console.WriteLine($"GenAlg done {m_gen_alg.Done}");
-                while (!m_gen_alg.Done && m_running)
+                while (!m_gen_alg.Done)
                 {
-                    //                    Console.WriteLine($"Generation {m_gen_alg.GenerationNumber}");
-                    setGenerationText(m_gen_alg.GenerationNumber.ToString());
-                    var start = DateTime.Now.Millisecond;
-                    m_gen_alg.Epoch();
-                    var end = DateTime.Now.Millisecond;
-//                    Console.WriteLine($"Took {end - start} ms");
-//                    Thread.Sleep(100);
-                    DrawPath();
+                    if(m_running)
+                    {
+                        setTexboxText(m_gen_box, m_gen_alg.GenerationNumber.ToString());
+                        var start = DateTime.Now.Millisecond;
+                        string message = m_gen_alg.Epoch();
+                        setTexboxText(m_message_text, message?.ToString());
+                        var end = DateTime.Now.Millisecond;
+                        DrawPath();
+                    }
                 }
+                m_stopped_event.Set();
             });
         }
 
@@ -100,9 +119,14 @@ namespace GeneticTSP
                     OnEnter(kea);
                     break;
                 case Keys.Space:
-                    Console.WriteLine("You pressed optional key space");
+                    Pause();
                     break;
             }
+        }
+
+        private void Pause()
+        {
+            m_running = !m_running;
         }
 
         private void CheckSelectedItem(ToolStripMenuItem selected_item)
@@ -168,28 +192,36 @@ namespace GeneticTSP
             m_gen_alg.SetMutationType(MutationType.DisplacedInversion);
         }
 
-        private void noneToolStripMenuItem_Click(object sender, EventArgs e)
+        private void noScaleToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            m_boltz_temp_lbl.Visible = false;
+            m_boltz_text.Visible = false;
             CheckSelectedItem(sender as ToolStripMenuItem);
             m_gen_alg.SetScalingType(null);
         }
 
         private void rankToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            m_boltz_temp_lbl.Visible = false;
+            m_boltz_text.Visible = false;
             CheckSelectedItem(sender as ToolStripMenuItem);
             m_gen_alg.SetScalingType(new RankFitnessScaler());
         }
 
         private void sigmaToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            m_boltz_temp_lbl.Visible = false;
+            m_boltz_text.Visible = false;
             CheckSelectedItem(sender as ToolStripMenuItem);
             m_gen_alg.SetScalingType(new SigmaFitnessScaler());
         }
 
         private void boltzmannToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            m_boltz_temp_lbl.Visible = true;
+            m_boltz_text.Visible = true;
             CheckSelectedItem(sender as ToolStripMenuItem);
-            m_gen_alg.SetScalingType(new BoltzmannFitnessScaler(300));
+            m_gen_alg.SetScalingType(new BoltzmannFitnessScaler(300, DisplayBoltzmannTemperature));
         }
 
         private void roulletteToolStripMenuItem_Click(object sender, EventArgs e)
