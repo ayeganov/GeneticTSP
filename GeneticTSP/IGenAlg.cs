@@ -79,9 +79,16 @@ namespace GeneticTSP
 
     interface IGenAlg<TGenomeType>
     {
-        void Epoch();
+        string Epoch();
         void CalculateFitness();
         IGeneration<TGenomeType> CreateGeneration(IGeneration<TGenomeType> generation, ISelectionStrategy<TGenomeType> strategy);
+        void SetSelectionStrategy(ISelectionStrategy<TGenomeType> strategy);
+        void SetMutationType(MutationType type);
+        void SetCrossoverType(CrossoverType type);
+        void SetScalingType(IFitnessScaler<TGenomeType> scaler);
+        bool Elitism { get; }
+
+        IFitnessScaler<TGenomeType> FitnessScaler { get; }
     }
 
     public interface IGenome<TData, TSubtype> where TSubtype : IGenome<TData, TSubtype>
@@ -100,12 +107,6 @@ namespace GeneticTSP
     {
         TGenomeType Select(IGeneration<TGenomeType> generation);
         IEnumerable<TGenomeType> SelectN(IGeneration<TGenomeType> generation, int n);
-    }
-
-    struct FitnessStat
-    {
-        double FitnessAverage { get; set; }
-        double FitnessStdDev { get; set; }
     }
 
     public interface IGeneration<TGenomeType> : IEnumerable<TGenomeType>
@@ -160,16 +161,6 @@ namespace GeneticTSP
         void AddGenome(TGenomeType genome);
     }
 
-    interface IPopulation<TGenomeType>
-    {
-        int Generation { get; }
-        IGeneration<TGenomeType> GetGeneration(int generation);
-        double GetGenerationAverage(int genIdx);
-        IEnumerable<double> GetGenerationsAverages();
-        void AddGeneration(IGeneration<TGenomeType> g);
-        IGeneration<TGenomeType> LastGeneration { get; }
-    }
-
     public enum MutationType
     {
         Exchange,
@@ -187,6 +178,13 @@ namespace GeneticTSP
         PositionBased,
     }
 
+    public enum ScalerType
+    {
+        Sigma,
+        Rank,
+        Boltzmann
+    }
+
     public interface IMutator<TGenomeType>
     {
         void Mutate(TGenomeType genome);
@@ -195,6 +193,12 @@ namespace GeneticTSP
     public interface ICrossOver<TGenomeType>
     {
         Tuple<TGenomeType, TGenomeType> Crossover(TGenomeType mom, TGenomeType dad);
+    }
+
+    public interface IFitnessScaler<TGenomeType>
+    {
+        event Action<double> OnScale;
+        void ScalePopulationFitness(IGeneration<TGenomeType> generation);
     }
 
     public interface IMutatorFactory<TMutator>
@@ -207,8 +211,9 @@ namespace GeneticTSP
         TCrossover CreateCrossover(CrossoverType co_type);
     }
 
-    internal interface IFitnessScaler<TGenomeType>
+    public interface IFitnessScalerFactory<TGenomeType>
     {
-        void ScalePopulationFitness(IGeneration<TGenomeType> generation);
+        IFitnessScaler<TGenomeType> CreateFitnessScaler(ScalerType scale_type);
     }
+
 }
